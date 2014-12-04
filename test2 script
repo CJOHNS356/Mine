@@ -1,0 +1,98 @@
+'GATHERING STATS----------------------------------------------------------------------------------------------------
+name_of_script = "Jobs notes"
+start_time = timer
+
+''LOADING ROUTINE FUNCTIONS
+Set run_another_script_fso = CreateObject("Scripting.FileSystemObject")
+Set fso_command = run_another_script_fso.OpenTextFile("C:\DHS-MAXIS-Scripts\Script Files\FUNCTIONS FILE.vbs")
+text_from_the_other_script = fso_command.ReadAll
+fso_command.Close
+Execute text_from_the_other_script
+
+call MAXIS_case_number_finder(case_number)
+
+'check for maxis
+maxis_check_function
+
+'job dialog box---------------------------------------------------------------------------
+BeginDialog job_dialog, 0, 0, 236, 175, "job_dialog"
+  EditBox 55, 0, 65, 15, case_number
+  EditBox 70, 20, 85, 15, employer_name
+  DropListBox 105, 40, 95, 15, "Full Time"+chr(9)+"Part Time", full_or_part_time
+  EditBox 55, 60, 55, 15, date_of_hire
+  DropListBox 105, 80, 80, 15, "Yes"+chr(9)+"No", Health_Insurance
+  ComboBox 60, 100, 110, 15, "Monthly"+chr(9)+"2 times a month"+chr(9)+"Every other week"+chr(9)+"weekly", pay_frequency
+  EditBox 75, 120, 65, 15, case_note_signature
+  ButtonGroup ButtonPressed
+    OkButton 125, 155, 50, 15
+    CancelButton 180, 155, 50, 15
+  Text 5, 40, 95, 10, "Choose full time or part time"
+  Text 5, 100, 50, 10, "Pay Frequency"
+  Text 5, 25, 55, 10, "Employer Name"
+  Text 5, 125, 65, 10, "Sign your case note"
+  Text 5, 60, 45, 10, "Date of Hire"
+  Text 5, 5, 45, 10, "Case Number"
+  Text 5, 80, 95, 10, "Is Health Insurance availble "
+EndDialog
+
+'connects to bluezone 
+EMconnect ""
+
+'does the dialog
+dialog job_dialog
+
+'date correcter
+'if Isdate(date_of_hire) = false then msgbox "you must type a valid date"
+
+'do 
+'loop until isdate(date_of_hire) = true
+
+'cancel button 
+if buttonpressed = 0 then StopScript
+
+'this do loop gets to the self menu
+do
+	EMSendKey "<PF3>"
+	EMWaitReady 0, 0
+	EMReadScreen SELF_check,  4, 2, 50
+loop until SELF_check = "SELF"
+
+'writes case
+EMWriteScreen "case", 16, 43
+
+'inputs case number
+EMwriteScreen case_number, 18, 43
+
+'inputs note
+EMWriteScreen "note", 21, 70
+
+'transmits
+EMSendKey "<enter>"
+
+'delay
+EMWaitReady 0, 0
+
+'PF9 to create a case note
+EMSendKey "<pf9>"
+
+'delay
+EMWaitReady 0, 0
+
+'writes case note
+
+call write_new_line_in_case_note("<<<<<<<<<<<<<<<<<<JOB INFORMATION>>>>>>>>>>>>>>>")
+
+call write_editbox_in_case_note("Employer: ", employer_name, 6)
+
+call write_editBox_in_case_note("full or part time", full_or_part_time, 6)
+
+call write_editBox_in_case_note("date of hire", date_of_hire, 6)
+
+call write_editBox_in_case_note("Is health Insurance available", Health_Insurance, 6)
+
+call write_editBox_in_case_note("pay frequency", pay_frequency, 6)
+
+call write_editBox_in_case_note("*", case_note_signature, 6) 
+
+
+
